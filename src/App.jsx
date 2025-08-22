@@ -1,9 +1,9 @@
 // frontend-react/src/App.jsx
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 
 function App() {
   // IMPORTANT: Replace this with the actual URL of your deployed Render Flask back-end
-  const API_BASE_URL = "https://bucketsolutions-backend.onrender.com"; // Example: https://bucketsolutions-api.onrender.com
+  const API_BASE_URL = "https://your-backend-api-name.onrender.com"; // Example: https://bucketsolutions-api.onrender.com
 
   const [productName, setProductName] = useState('Xerox 1918');
   const [customerId, setCustomerId] = useState('AA-10315');
@@ -13,17 +13,20 @@ function App() {
   const [contentRecs, setContentRecs] = useState([]);
   const [collaborativeRecs, setCollaborativeRecs] = useState([]);
   const [basketRecs, setBasketRecs] = useState([]);
+  const [hybridRecs, setHybridRecs] = useState([]); // NEW: State for hybrid recommendations
 
   const [loadingPopular, setLoadingPopular] = useState(false);
   const [loadingContent, setLoadingContent] = useState(false);
   const [loadingCollaborative, setLoadingCollaborative] = useState(false);
   const [loadingBasket, setLoadingBasket] = useState(false);
+  const [loadingHybrid, setLoadingHybrid] = useState(false); // NEW: Loading state for hybrid
   const [loadingUpload, setLoadingUpload] = useState(false);
 
   const [errorPopular, setErrorPopular] = useState(null);
   const [errorContent, setErrorContent] = useState(null);
   const [errorCollaborative, setErrorCollaborative] = useState(null);
   const [errorBasket, setErrorBasket] = useState(null);
+  const [errorHybrid, setErrorHybrid] = useState(null); // NEW: Error state for hybrid
   const [errorUpload, setErrorUpload] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -84,6 +87,7 @@ function App() {
       const data = await response.json();
       if (response.ok) {
         setUploadMessage(data.message);
+        // After successful upload, re-fetch popular recommendations
         fetchRecommendations('/recommend/popular', null, setPopularRecs, setLoadingPopular, setErrorPopular, 'GET');
       } else {
         setErrorUpload(data.error || 'An unknown error occurred during upload.');
@@ -111,6 +115,11 @@ function App() {
   const handleGetBasketRecs = () => {
     const itemsArray = basketItems.split(',').map(item => item.trim()).filter(item => item !== '');
     fetchRecommendations('/recommend/basket', { items: itemsArray }, setBasketRecs, setLoadingBasket, setErrorBasket);
+  };
+
+  // NEW: Handler for fetching hybrid recommendations
+  const handleGetHybridRecs = () => {
+    fetchRecommendations('/recommend/hybrid', { customer_id: customerId }, setHybridRecs, setLoadingHybrid, setErrorHybrid);
   };
 
   // Recommendation Card Component (using JSX)
@@ -217,6 +226,24 @@ function App() {
             </button>
           </div>
         </div>
+        {/* NEW: Hybrid Recommendation Input */}
+        <div className="mt-8 flex flex-col items-center">
+            <label htmlFor="hybridCustomerId" className="text-gray-300 text-sm mb-2">Customer ID (for Hybrid Recommendation)</label>
+            <input
+              type="text"
+              id="hybridCustomerId"
+              className="p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-blue-500 focus:border-blue-500 text-white w-full max-w-md"
+              value={customerId} // Using the same customerId state for simplicity
+              onChange={(e) => setCustomerId(e.target.value)}
+              placeholder="e.g., AA-10315"
+            />
+            <button
+              onClick={handleGetHybridRecs}
+              className="mt-4 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-md text-white font-semibold transition duration-300 ease-in-out transform hover:scale-105 w-full max-w-md"
+            >
+              Get Hybrid Recs
+            </button>
+        </div>
       </section>
 
       <section>
@@ -245,6 +272,13 @@ function App() {
             recommendations={basketRecs}
             loading={loadingBasket}
             error={errorBasket}
+          />
+          {/* NEW: Hybrid Recommendation Card */}
+          <RecommendationCard
+            title="Hybrid Recommendations"
+            recommendations={hybridRecs}
+            loading={loadingHybrid}
+            error={errorHybrid}
           />
         </div>
       </section>
