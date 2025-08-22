@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 function App() {
   // IMPORTANT: Replace this with the actual URL of your deployed Render Flask back-end
-  const API_BASE_URL = "https://your-backend-api-name.onrender.com"; // Example: https://bucketsolutions-api.onrender.com
+  const API_BASE_URL = "https://bucketsolutions-backend.onrender.com"; // Example: https://bucketsolutions-api.onrender.com
 
   const [productName, setProductName] = useState('Xerox 1918');
   const [customerId, setCustomerId] = useState('AA-10315');
